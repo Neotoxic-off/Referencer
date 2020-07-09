@@ -1,6 +1,14 @@
 # Referencer
 Get all Href and Src from webpage
 
-### About
-Output: href.txt
-        src.txt
+## Install:
+```BASH
+git clone https://github.com/Neotoxic-off/Referencer
+cd Referencer
+pip3 install -r requirements.txt
+```
+
+## Usage:
+```BASH
+python3 referencer.py
+```
