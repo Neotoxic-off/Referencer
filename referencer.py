@@ -11,6 +11,9 @@ class settings:
     FILE = "data.txt"
     DATA = []
 
+def ALL():
+    return (settings.DATA)
+
 def clean(line):
     ref = ""
     count = 0
@@ -31,14 +34,12 @@ def check(url):
     return (0)
 
 def resume(array):
-    f = open(settings.FILE, 'w+')
-
     for i in range(0, len(array)):
         if array[i].startswith("https://") and check(array[i]) == 0:
+            print(array[i])
             settings.DATA.append(array[i])
-            connect(array[i])
-            os.system("wget -q %s" % (array[i]))
-    f.close()
+            if array[i].endswith("/") == False:
+                os.system("wget -q %s" % (array[i]))
 
 def parse_href(r):
     count = 0
@@ -62,11 +63,16 @@ def parse_src(r):
             count += 1
     resume(src)
 
-def connect(url):
-    print("=> %s" % url)
-    r = requests.get(url)
-    if r.status_code == 200:
-        parse_href(r)
-        parse_src(r)
+def connect():
+    i = 0
 
-connect(input("url: "))
+    while settings.DATA[i]:
+        print("=> %s" % settings.DATA[i])
+        r = requests.get(settings.DATA[i])
+        if r.status_code == 200:
+            parse_href(r)
+            parse_src(r)
+        i += 1
+
+settings.DATA.append(input("url: "))
+connect()
