@@ -7,9 +7,12 @@ from lib import status
 from lib import colors
 
 class settings:
-    URL  = None
-    FILE = "data.txt"
     DATA = []
+    EXTE = []
+
+def extension():
+    for i in range(1, len(sys.argv)):
+        settings.EXTE.append(sys.argv[i])
 
 def ALL():
     return (settings.DATA)
@@ -36,10 +39,12 @@ def check(url):
 def resume(array):
     for i in range(0, len(array)):
         if array[i].startswith("https://") and check(array[i]) == 0:
-            print(array[i])
+            print("=> %s" % array[i])
             settings.DATA.append(array[i])
-            if array[i].endswith("/") == False:
-                os.system("wget -q %s" % (array[i]))
+            for j in range(0, len(settings.EXTE)):
+                if array[i].endswith(settings.EXTE[j]):
+                    print("-> %s" % array[i])
+                    os.system("wget -q %s" % (array[i]))
 
 def parse_href(r):
     count = 0
@@ -66,12 +71,16 @@ def parse_src(r):
 def connect():
     i = 0
 
+    extension()
     while settings.DATA[i]:
         print("=> %s" % settings.DATA[i])
-        r = requests.get(settings.DATA[i])
-        if r.status_code == 200:
-            parse_href(r)
-            parse_src(r)
+        try:
+            r = requests.get(settings.DATA[i])
+            if r.status_code == 200:
+                parse_href(r)
+                parse_src(r)
+        except:
+            print("Can't access: %s" % settings.DATA[i])
         i += 1
 
 settings.DATA.append(input("url: "))
