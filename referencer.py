@@ -3,16 +3,19 @@
 import sys
 import os
 import shutil
+from signal import signal, SIGINT
 import requests
 import argparse
 
 class settings:
-    DATA      = []
-    EXTENSION = []
-    EXCEPTION = []
-    OUT       = None
-    TIMEOUT   = 5
-    CLEAN     = True
+    DATA       = []
+    EXTENSION  = []
+    EXCEPTION  = []
+    OUT        = None
+    TIMEOUT    = 5
+    DOWNLOADED = 0
+    LIMIT      = 0
+    CLEAN      = True
 
 def color(c):
     colors = {
@@ -36,6 +39,10 @@ def status(s):
         "error"    : "%s E: %s" % (color("red"),    color("reset")),
     }
     return (statuses.get("%s" % s))
+
+def handler(signal_received, frame):
+    print('SIGINT or CTRL-C detected. Exiting gracefully')
+    sys.exit(0)
 
 def clean(line, c):
     ref = ""
@@ -72,11 +79,17 @@ def extension(element):
         return (0)
     return (1)
 
+def limit():
+    if settings.DOWNLOADED == settings.LIMIT:
+        return (1)
+    return (0)
+
 def download(element):
     if extension(element) == 1 and exception(element) == 1:
         try:
             print("%s  %s" % (status("download"), element))
             os.system("wget %s --directory-prefix=%s -O %s/%s -q" % (element, settings.OUT, settings.OUT, exists(element)))
+            settings.DOWNLOADED += 1
             return (1)
         except:
             print("%s  %s" % (status("error"), element))
@@ -178,22 +191,26 @@ def folder():
 def arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--output",    action = "store", default = "referenced", help = "Directory to store content")
-    parser.add_argument('-l', '--list',      nargs  = '*',     default = [],           help = "Extension's content to download")
+    parser.add_argument('-t', '--type',      nargs  = '*',     default = [],           help = "Extension's content to download")
     parser.add_argument("-e", "--exception", nargs  = '*',     default = [],           help = "Extension's content not to download")
+    parser.add_argument("-l", "--limit",     nargs  = '*',     default = 0,            help = "Exit after number of download", type = int)
     parser.add_argument("-u", "--url",       nargs  = '*',     default = [],           help = "Url to extract", required = True)
     args = parser.parse_args()
-    settings.EXTENSION = args.list
+    settings.EXTENSION = args.type
     settings.EXCEPTION = args.exception
     settings.OUT       = args.output
     settings.DATA      = args.url
+    settings.LIMIT     = args.limit
 
 def connect():
     i = 0
-
+    signal(SIGINT, handler)
     arguments()
     folder()
     try:
         while settings.DATA[i]:
+            if limit() == 1:
+                return (0)
             try:
                 if download(settings.DATA[i]) != 1:
                     r = requests.get(settings.DATA[i], timeout = settings.TIMEOUT)
