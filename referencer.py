@@ -28,7 +28,7 @@ def color(c):
 
 def status(s):
     statuses = {
-        "download" : "%s ~> %s " % (color("yellow"), color("reset")),
+        "download" : "%s ~> %s" % (color("purple"), color("reset")),
         "ko"       : "%s KO %s" % (color("red"),    color("reset")),
         "ok"       : "%s OK %s" % (color("green"),  color("reset")),
         "info"     : "%s ?? %s" % (color("purple"), color("reset")),
@@ -37,15 +37,15 @@ def status(s):
     }
     return (statuses.get("%s" % s))
 
-def clean(line):
+def clean(line, c):
     ref = ""
     count = 0
     i = 0
 
-    while i < len(line) and count != 1:
-        if line[i] == '"' or line[i] == '\n':
+    while i < len(line):
+        if line[i] == c or line[i] == '\n':
             count += 1
-        if count == 0 and line[i] != '"':
+        if count == 0 and line[i] != c:
             ref += line[i]
         i += 1
     return (ref)
@@ -57,28 +57,20 @@ def check(url):
     return (0)
 
 def exception(element):
-    total = 0
-
     if len(settings.EXCEPTION) > 0:
         for i in range(0, len(settings.EXCEPTION)):
-            if element.endswith(settings.EXCEPTION[i]) == False:
-                return (1)
-            total += 1
-        if total == len(settings.EXCEPTION):
-            return (0)
+            if element.endswith(settings.EXCEPTION[i]):
+                return (-1)
+        return (1)
     return (1)
 
 def extension(element):
-    total = 0
-
     if len(settings.EXTENSION) > 0:
         for i in range(0, len(settings.EXTENSION)):
             if element.endswith(settings.EXTENSION[i]):
                 return (1)
-            total += 1
-        if total == len(settings.EXCEPTION):
-            return (0)
-    return (0)
+        return (0)
+    return (1)
 
 def download(element):
     if extension(element) == 1 and exception(element) == 1:
@@ -99,25 +91,48 @@ def resume(array):
 
 def parse_href(r):
     count = 0
+    data = r.text.split('href=\'')
+    href = []
+
+    for i in range(1, len(data)):
+        if len(data[i]) >= 1:
+            href.append(clean(data[i], '\''))
+            count += 1
+    resume(href)
+
+def parse_href_maj(r):
+    count = 0
     data = r.text.split('href="')
     href = []
 
     for i in range(1, len(data)):
         if len(data[i]) >= 1:
-            href.append(clean(data[i]))
+            href.append(clean(data[i], '"'))
             count += 1
     resume(href)
 
 def parse_src(r):
+    count = 0
+    data = r.text.split('src=\'')
+    src = []
+
+    for i in range(1, len(data)):
+        if len(data[i]) >= 1:
+            src.append(clean(data[i], '\''))
+            count += 1
+    resume(src)
+
+def parse_src_maj(r):
     count = 0
     data = r.text.split('src="')
     src = []
 
     for i in range(1, len(data)):
         if len(data[i]) >= 1:
-            src.append(clean(data[i]))
+            src.append(clean(data[i], '"'))
             count += 1
     resume(src)
+
 
 def count_char(str, char):
     total = 0
@@ -177,18 +192,23 @@ def connect():
 
     arguments()
     folder()
-    while settings.DATA[i]:
-        try:
-            if download(settings.DATA[i]) != 1:
-                r = requests.get(settings.DATA[i], timeout = settings.TIMEOUT)
-                if r.status_code == 200:
-                    parse_href(r)
-                    parse_src(r)
-                    print("%s  %s" % (status("ok"), settings.DATA[i]))
-                else:
-                    print("%s  %s" % (status("ko"), settings.DATA[i]))
-        except:
-            print("%s  %s" % (status("error"), settings.DATA[i]))
-        i += 1
+    try:
+        while settings.DATA[i]:
+            try:
+                if download(settings.DATA[i]) != 1:
+                    r = requests.get(settings.DATA[i], timeout = settings.TIMEOUT)
+                    if r.status_code == 200:
+                        parse_href(r)
+                        parse_src(r)
+                        parse_href_maj(r)
+                        parse_src_maj(r)
+                        print("%s  %s" % (status("ok"), settings.DATA[i]))
+                    else:
+                        print("%s  %s" % (status("ko"), settings.DATA[i]))
+            except:
+                print("%s  %s" % (status("error"), settings.DATA[i]))
+            i += 1
+    except:
+        return (0)
 
 connect()
