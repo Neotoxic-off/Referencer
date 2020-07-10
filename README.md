@@ -10,20 +10,21 @@ pip3 install -r requirements.txt
 
 ## Usage:
 
-Download ALL:
 ```BASH
-python3 referencer.py
+python3 referencer.py -u <URL>
 ```
 
-Download Specific:
+## Help:
+
 ```BASH
-python3 referencer.py <extension 1> <extension 2> ...
+-o / --output    : Directory to store content
+-l / --list      : Extension's content to download
+-e / --exception : Extension's content not to download
+-u / --url       : Url to extract
 ```
 
-#### Example:
+## Example:
 
 ```BASH
-python3 referencer.py jpg png wav mp3
-
-# Referencer will download ONLY the jpg, png, wav and mp3 files
+python3 referencer.py -u <URL> -l .png .jpg .mp3 -e no.mp3 ..mp3 -o download
 ```
