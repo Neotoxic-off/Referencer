@@ -80,8 +80,9 @@ def extension(element):
     return (1)
 
 def limit():
-    if settings.DOWNLOADED == settings.LIMIT:
-        return (1)
+    if settings.LIMIT > 0:
+        if settings.DOWNLOADED == settings.LIMIT:
+            return (1)
     return (0)
 
 def download(element):
