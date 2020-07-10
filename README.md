@@ -16,9 +16,10 @@ python3 referencer.py -u <URL>
 
 ## Help:
 
-```BASH
+```
 -o / --output    : Directory to store content
--l / --list      : Extension's content to download
+-l / --limit     : Exit after number of download
+-t / --type      : Extension's content to download
 -e / --exception : Extension's content not to download
 -u / --url       : Url to extract
 ```
