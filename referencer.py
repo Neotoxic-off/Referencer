@@ -192,7 +192,4 @@ def connect():
         except:
             print("%s  %s" % (status("error"), settings.DATA[i]))
         i += 1
-
-print(exists("https://cdn.cartoontube.xxx/th/6000/6954/preview.mp4.jpg"))
-exit(0)
 connect()
