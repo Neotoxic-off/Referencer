@@ -127,23 +127,25 @@ def count_char(str, char):
             total += 1
     return (total)
 
-def exctract(path):
+def extract(path, c):
     cleanned = ""
     count = 0
-    total = count_char(path, '/')
+    total = count_char(path, c)
 
-    if path[len(path) - 1] == '/':
+    if path[len(path) - 1] == c:
         total -= 1
     for i in range(0, len(path)):
-        if path[i] == '/':
+        if path[i] == c:
             count += 1
-        if path[i] != '/' and count == total:
+        if path[i] != c and count == total:
             cleanned += path[i]
     return (cleanned)
 
 def exists(path):
-    name = exctract(path).split('.')[0]
-    ext  = exctract(path).split('.')[1]
+    name = extract(path, '/').split('.')[0]
+    ext  = extract(path, '/')
+    name = extract(path, '.')
+    ext  = extract(path, '.')
     i = 0
     content = "%s_%d.%s" % (name, i, ext)
 
@@ -191,4 +193,6 @@ def connect():
             print("%s  %s" % (status("error"), settings.DATA[i]))
         i += 1
 
+print(exists("https://cdn.cartoontube.xxx/th/6000/6954/preview.mp4.jpg"))
+exit(0)
 connect()
