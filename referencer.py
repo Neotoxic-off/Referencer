@@ -143,9 +143,7 @@ def extract(path, c):
 
 def exists(path):
     name = extract(path, '/').split('.')[0]
-    ext  = extract(path, '/')
-    name = extract(path, '.')
-    ext  = extract(path, '.')
+    ext  = extract(path, '/').split('.')[1]
     i = 0
     content = "%s_%d.%s" % (name, i, ext)
 
@@ -192,4 +190,5 @@ def connect():
         except:
             print("%s  %s" % (status("error"), settings.DATA[i]))
         i += 1
+
 connect()
